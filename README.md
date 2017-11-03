@@ -1,6 +1,16 @@
 # D3M_Group_1
 Intrahealth - Uganda
 
+
+### Setup
+* Make sure node is installed
+* Type "npm install" to install dependencies
+
+### Instructions (these should work)
+* Make sure to build web-app first, so type "npm run build-app"
+* To run web server type "npm start"
+
+
 ### Reference Tutorials
 1. WebApp with Django - [Just Django Playlist](https://www.youtube.com/watch?v=FNQxxpM1yOs&list=PLQVvvaa0QuDeA05ZouE4OzDYLHY-XH-Nd)
 2. StackOverflow post on how to see Django and ReactJs come together - has other places - github repos and youtube videos that are helpful
