@@ -20,7 +20,8 @@
   "homepage": "https://github.com/Nikhila-B/D3M_Group_1#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "mssql": "^4.1.0"
   },
   "devDependencies": {
     "axios": "^0.17.0",

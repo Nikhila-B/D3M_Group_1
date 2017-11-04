@@ -1,7 +1,13 @@
 const express = require('express');
+const mssql = require('mssql');
+
+const dbconfig = require('../dbconfig');
 
 let router = express.Router();
 
+mssql.connect(dbconfig).then(() => {
+    console.log("YAY!")
+}).catch(err => console.log(err));
 
 // example: HTTP GET
 router.get('/facilities', (req, res) => {
@@ -9,8 +15,14 @@ router.get('/facilities', (req, res) => {
     let facilities = ['A', 'B'];
 
     // send facilities
-    res.send(facilities)
+    res.json(facilities)
 });
+
+router.get('/cadres', (req, res) => {
+    let cadres = ['Doctor', 'Nurse', 'Midwife', 'LPN'];
+
+    res.json(cadres);
+})
 
 // example: HTTP POST
 router.post('/workforce', (req, res) => {
