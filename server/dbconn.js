@@ -1,5 +1,6 @@
+const mssql = require('mssql');
 
-module.exports = {
+const config = {
     server: "csc495.database.windows.net",
     database: "csc495-db",
     user: "csc495",
@@ -9,3 +10,7 @@ module.exports = {
         encrypt: true
     }
 };
+
+let conn = mssql.connect(config);
+
+module.exports = conn;

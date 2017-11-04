@@ -1,26 +1,27 @@
 const express = require('express');
-const mssql = require('mssql');
 
-const dbconfig = require('../dbconfig');
+const dbconn = require('../dbconn');
 
 let router = express.Router();
 
-mssql.connect(dbconfig).then(pool => {
-    return pool.request()
-        .query('SELECT * FROM Facilities')
-}).then(result => {
-    console.log(result);
-    console.log(result.recordset[0].Name)
-    
-}).catch(err => console.log(err));
 
 // example: HTTP GET
 router.get('/facilities', (req, res) => {
-    // get list of facilities
-    let facilities = ['A', 'B'];
 
-    // send facilities
-    res.json(facilities)
+    // get list of facilities
+    let facilities = [];
+
+    dbconn.then(pool => {
+        return pool.request()
+            .query('SELECT Name FROM Facilities')
+    }).then(result => {
+        result.recordset.forEach(record => {
+            facilities.push(record.Name);   
+        });
+        
+        // send facilities
+        res.json(facilities)
+    });
 });
 
 router.get('/cadres', (req, res) => {
