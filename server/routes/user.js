@@ -5,8 +5,13 @@ const dbconfig = require('../dbconfig');
 
 let router = express.Router();
 
-mssql.connect(dbconfig).then(() => {
-    console.log("YAY!")
+mssql.connect(dbconfig).then(pool => {
+    return pool.request()
+        .query('SELECT * FROM Facilities')
+}).then(result => {
+    console.log(result);
+    console.log(result.recordset[0].Name)
+    
 }).catch(err => console.log(err));
 
 // example: HTTP GET
