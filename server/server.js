@@ -16,13 +16,13 @@ app.use(bodyParser.json()); // application/json
 // serve static files in public folder
 app.use(express.static(path.join(__dirname, "../", "public")));
 
-// use our routes
+// use our routes http://localhost:3000/api/user
 app.use('/api/user', user);
 app.use('/api/admin', admin);
 
 // instead of 404, redirect to index page
 app.use('*', (req, res) => {
-    res.redirect('/');
+    res.sendFile(path.join(__dirname, "../", "public", "index.html"));
 })
 
 // start listening for requests

@@ -1,28 +1,35 @@
 import * as React from 'react';
-import { Panel, Form, FormGroup, ControlLabel, FormControl, Col, Checkbox } from 'react-bootstrap';
+import { Panel, Form, FormGroup, ControlLabel, Row, FormControl, Col, Checkbox, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 export default class WPCPanel extends React.Component {
 
     constructor(props) {
         super(props);
-        
+
         this.state = {
             cadres: [],
             facilities: [],
             selectedCadres: [],
-            selectedFacility: 0
+            selectedFacility: 0,
+            cadreHours: [],
+            percentageAdminHours: 0
         };
 
         axios.get('/user/cadres').then(res => {
             let cadres = res.data;
 
             let selectedCadres = [];
-            cadres.forEach(() => selectedCadres.push(true));
+            let cadreHours = [];
+            cadres.forEach(() => {
+                selectedCadres.push(true);
+                cadreHours.push(40);
+            });
 
             this.setState({
                 cadres: cadres,
-                selectedCadres: selectedCadres
+                selectedCadres: selectedCadres,
+                cadreHours: cadreHours
             });
         }).catch(err => console.log(err));
 
@@ -34,6 +41,7 @@ export default class WPCPanel extends React.Component {
             });
 
         }).catch(err => console.log(err));
+
     }
 
     checkboxChange(index) {
@@ -45,38 +53,85 @@ export default class WPCPanel extends React.Component {
         });
     }
 
+    cadreHoursChanged(e, i) {
+        let cadreHours = this.state.cadreHours;
+        cadreHours[i] = e.target.value;
+        this.setState({ cadreHours: cadreHours });
+    }
+
+    calculateClicked() {
+
+        let data = {
+            facilityId: this.state.selectedFacility,
+            cadres: {},
+            percentageAdminHours: this.state.percentageAdminHours
+        };
+
+        this.state.cadres.forEach((cadre, i) => {
+            if (this.state.selectedCadres[i]) {
+                data.cadres[i] = this.state.cadreHours[i]
+            }
+        });
+
+
+        axios.post('/user/workforce', data).then(res => {
+
+            console.log(res.data);
+
+        }).catch(err => console.log(err));
+
+    }
+
     render() {
         return (
-            <Panel header="Work Force Pressure Calculator" eventKey="1">
-                        <Form horizontal>
-                            <FormGroup>
-                                <Col componentClass={ControlLabel} sm={4}>
-                                    Facility
-                            </Col>
-                                <Col sm={8}>
-                                    <FormControl componentClass="select">
-                                        {(this.state.facilities.map((facility, i) => 
-                                            <option value={i}>{facility}</option>
-                                        ))}
-                                    </FormControl>
+            <Form horizontal style={{ width: "70%", margin: "0 auto 0" }}>
+                <FormGroup>
+                    <Col componentClass={ControlLabel} sm={3}>
+                        Facility
+                    </Col>
+                    <Col sm={8}>
+                        <FormControl componentClass="select">
+                            {(this.state.facilities.map((facility, i) =>
+                                <option value={facility.id}>{facility.name}</option>
+                            ))}
+                        </FormControl>
+                    </Col>
+                </FormGroup>
+                <FormGroup>
+                    <Col componentClass={ControlLabel} sm={3}>Cadres</Col>
+                    <Col sm={8}>
+                        {(this.state.cadres.map((cadre, i) =>
+                            <Row style={{ padding: 2 }}>
+                                <Col xs={4}>
+                                    <Checkbox
+                                        checked={this.state.selectedCadres[i]}
+                                        onChange={() => this.checkboxChange(i)}
+                                    >{cadre.name}
+                                    </Checkbox>
                                 </Col>
-                            </FormGroup>
-                            <FormGroup>
-                                <Col componentClass={ControlLabel} sm={4}>
-                                    Cadres
-                            </Col>
-                                <Col sm={8}>
-                                    {(this.state.cadres.map((cadre, i) => 
-                                        <Checkbox 
-                                            checked={this.state.selectedCadres[i]}
-                                            onChange={() => this.checkboxChange(i)}
-                                            >{cadre}
-                                        </Checkbox>
-                                    ))}
+                                <Col xs={3}>
+                                    {this.state.selectedCadres[i] &&
+                                        <FormControl type="number" onChange={e => this.cadreHoursChanged(e, i)} value={this.state.cadreHours[i]} />}
                                 </Col>
-                            </FormGroup>
-                        </Form>
-                    </Panel>
+                                <Col xs={3}>
+                                    {this.state.selectedCadres[i] && <h5>hours/week</h5>}
+                                </Col>
+                            </Row>
+                        ))}
+                    </Col>
+                </FormGroup>
+                <FormGroup>
+                    <Col componentClass={ControlLabel} sm={3}>
+                        % of time spent of admin task
+                    </Col>
+                    <Col sm={8}>
+                        <FormControl type="text" />
+                    </Col>
+                </FormGroup>
+                <div style={{ textAlign: "right" }}>
+                    <Button onClick={() => this.calculateClicked()}>Calculate</Button>
+                </div>
+            </Form>
         );
     }
 

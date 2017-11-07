@@ -14,7 +14,9 @@ export default class UserPage extends React.Component {
         return (
             <div>
                 <Accordion defaultActiveKey="1">
-                    <WPCPanel />
+                    <Panel header="Work Force Pressure Calculator" eventKey="1">
+                        <WPCPanel />
+                    </Panel>
                     <Panel header="Predictive Work Force Pressure Calculator" eventKey="2">
                         <Form horizontal>
                             <FormGroup>
