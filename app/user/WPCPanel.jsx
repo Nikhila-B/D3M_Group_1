@@ -59,17 +59,21 @@ export default class WPCPanel extends React.Component {
         this.setState({ cadreHours: cadreHours });
     }
 
+    cadreAdminAmtChanged(e) {
+        this.setState({ percentageAdminHours: e.target.value });
+    }
+
     calculateClicked() {
 
         let data = {
             facilityId: this.state.selectedFacility,
             cadres: {},
-            percentageAdminHours: this.state.percentageAdminHours
+            percentageAdminHours: parseFloat(this.state.percentageAdminHours)
         };
 
         this.state.cadres.forEach((cadre, i) => {
             if (this.state.selectedCadres[i]) {
-                data.cadres[i] = this.state.cadreHours[i]
+                data.cadres[i] = parseFloat(this.state.cadreHours[i])
             }
         });
 
@@ -90,7 +94,8 @@ export default class WPCPanel extends React.Component {
                         Facility
                     </Col>
                     <Col sm={8}>
-                        <FormControl componentClass="select">
+                        <FormControl componentClass="select"
+                            onChange={e => this.setState({ selectedFacility: e.target.value })}>
                             {(this.state.facilities.map((facility, i) =>
                                 <option value={facility.id}>{facility.name}</option>
                             ))}
@@ -125,7 +130,7 @@ export default class WPCPanel extends React.Component {
                         % of time spent of admin task
                     </Col>
                     <Col sm={8}>
-                        <FormControl type="text" />
+                        <FormControl type="text" value={this.state.percentageAdminHours} onChange={e => this.cadreAdminAmtChanged(e)} />
                     </Col>
                 </FormGroup>
                 <div style={{ textAlign: "right" }}>
