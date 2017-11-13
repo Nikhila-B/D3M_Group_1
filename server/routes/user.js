@@ -29,7 +29,7 @@ router.get('/facilities', (req, res) => {
 router.get('/cadres', (req, res) => {
     // get list of cadres
     dbconn.then(pool => {
-        pool.request()
+        return pool.request()
             .query('SELECT Id, [Job Cadre] FROM Cadre')
     }).then(result => {
         let cadres = [];
