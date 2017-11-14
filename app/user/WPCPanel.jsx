@@ -13,7 +13,9 @@ export default class WPCPanel extends React.Component {
             selectedCadres: [],
             selectedFacility: 0,
             cadreHours: [],
-            percentageAdminHours: 0
+            percentageAdminHours: 0,
+            state: 'form',
+            results: null
         };
 
         axios.get('/user/cadres').then(res => {
@@ -65,30 +67,38 @@ export default class WPCPanel extends React.Component {
 
     calculateClicked() {
 
-        let data = {
-            facilityId: this.state.selectedFacility,
-            cadres: {},
-            percentageAdminHours: parseFloat(this.state.percentageAdminHours)
-        };
+        // set state to loading
+        this.setState({ state: 'loading' });
 
-        this.state.cadres.forEach((cadre, i) => {
-            if (this.state.selectedCadres[i]) {
-                data.cadres[i] = parseFloat(this.state.cadreHours[i])
-            }
-        });
+        // add timeout so loading animation looks better
+        setTimeout(() => {
+            // get input from forms and put it in a data object
+            let data = {
+                facilityId: this.state.selectedFacility,
+                cadres: {},
+                percentageAdminHours: parseFloat(this.state.percentageAdminHours)
+            };
 
+            this.state.cadres.forEach((cadre, i) => {
+                if (this.state.selectedCadres[i]) {
+                    data.cadres[i] = parseFloat(this.state.cadreHours[i])
+                }
+            });
 
-        axios.post('/user/workforce', data).then(res => {
+            // send the calculate workforce request
+            axios.post('/user/workforce', data).then(res => {
 
-            console.log(res.data);
-
-        }).catch(err => console.log(err));
-
+                this.setState({
+                    results: res.data,
+                    state: 'results'
+                });
+            }).catch(err => console.log(err));
+        }, 400);
     }
 
-    render() {
+    renderForm() {
         return (
-            <Form horizontal style={{ width: "70%", margin: "0 auto 0" }}>
+            <Form horizontal>
                 <FormGroup>
                     <Col componentClass={ControlLabel} sm={3}>
                         Facility
@@ -97,7 +107,7 @@ export default class WPCPanel extends React.Component {
                         <FormControl componentClass="select"
                             onChange={e => this.setState({ selectedFacility: e.target.value })}>
                             {(this.state.facilities.map((facility, i) =>
-                                <option value={facility.id}>{facility.name}</option>
+                                <option key={i} value={facility.id}>{facility.name}</option>
                             ))}
                         </FormControl>
                     </Col>
@@ -106,7 +116,7 @@ export default class WPCPanel extends React.Component {
                     <Col componentClass={ControlLabel} sm={3}>Cadres</Col>
                     <Col sm={8}>
                         {(this.state.cadres.map((cadre, i) =>
-                            <Row style={{ padding: 2 }}>
+                            <Row key={i} style={{ padding: 2 }}>
                                 <Col xs={4}>
                                     <Checkbox
                                         checked={this.state.selectedCadres[i]}
@@ -137,6 +147,44 @@ export default class WPCPanel extends React.Component {
                     <Button onClick={() => this.calculateClicked()}>Calculate</Button>
                 </div>
             </Form>
+        );
+    }
+
+    renderLoading() {
+        return (
+            <div style={{ marginTop: 120, marginBottom: 65 }}>
+                <div class="loader"></div>
+            </div>
+        );
+    }
+
+    renderResults() {
+        return (
+            <div>
+                <h3>Results</h3>
+                <Row>
+                    <Col xs={8}>
+                        <h4>Workers Needed</h4>
+                    </Col>
+                    <Col xs={4}>
+                        <h4>{this.state.results.workersNeeded}</h4>
+                    </Col>
+                </Row>
+                <br />
+                <div style={{ textAlign: "right" }}>
+                    <Button onClick={() => this.setState({ state: 'form' })}>Back</Button>
+                </div>
+            </div>
+        )
+    }
+
+    render() {
+        return (
+            <div style={{ width: "70%", margin: "0 auto 0" }}>
+                {this.state.state == 'form' && this.renderForm()}
+                {this.state.state == 'loading' && this.renderLoading()}
+                {this.state.state == 'results' && this.renderResults()}
+            </div>
         );
     }
 

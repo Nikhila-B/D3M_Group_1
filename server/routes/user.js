@@ -46,6 +46,7 @@ router.get('/cadres', (req, res) => {
     });
 });
 
+const sql = require('mssql');
 // example: HTTP POST
 router.post('/workforce', (req, res) => {
 
@@ -56,30 +57,45 @@ router.post('/workforce', (req, res) => {
           percentageAdminHours: 30 }
   */
 
-    // right now just calculate for AIDS, so get tasks and treatments for that
-    dbconn.then(pool => {
-        return pool.request()
-            .query('SELECT * FROM Treatments')
-            .then(result => {
-                console.log(result);
 
-                return pool.request()
-                    .query('SELECT * FROM TreatmentSteps');
-            }).then(result => {
-                console.log(result);
-            });
+
+    let workersNeeded = {};
+
+    sql.query`SELECT Id, Ratio FROM Treatments; SELECT TreatmentId, SUM(Patients) FROM DHIS2 WHERE FacilityId = ${req.body.facilityId} GROUP BY TreatmentId;`
+        .then(result => console.log(result));
+
+    // calculate for each cadre
+    Object.keys(req.body.cadres).forEach(cadreId => {
+
+        
+            let treatments = {};
+            let timePerTreatment = {};
+            let patientsPerTreatment = {};
+
+            sql.query`SELECT TreatmentId, SUM(MinutesPerPatient) FROM TreatmentSteps INNER JOIN TimeOnTask ON TreatmentSteps.TaskId = TimeOnTask.Id WHERE CadreId = ${cadreId} GROUP BY TreatmentId`
+                .then(result => console.log(result));
+
+
+          /*  return pool.request()
+                .query('SELECT Id, Ratio FROM Treatments')
+                .then(result => {
+
+                    console.log(result);
+                    
+                   
+                }).then(result => {
+
+                    console.log(result);
+
+                }).then(result => {
+
+                    console.log(result);
+                }).then(() => {
+                    res.json({ workersNeeded: 0 })
+                });*/
+        //}).then(result => console.log(result));
+
     });
-    // get time for each task
-
-    // calcualte
-
-    let workersNeeded = 0;
-
-    // get number of the workers at that facility to compare
-    // SELECT COUNT(Id) FROM iHRIS WHERE FacilityId='2'
-
-    res.json({ workersNeeded: workersNeeded })
-
 });
 
 
