@@ -1,4 +1,5 @@
 const express = require('express');
+const sql = require('mssql');
 
 const dbconn = require('../dbconn');
 
@@ -46,56 +47,53 @@ router.get('/cadres', (req, res) => {
     });
 });
 
-const sql = require('mssql');
-// example: HTTP POST
+
 router.post('/workforce', (req, res) => {
 
-    console.log(req.body);
     /* what req.body looks like:
         { facilityId: '7',
           cadres: { '0': 40, '1': 50, '2': 35 },
           percentageAdminHours: 30 }
-  */
+    */
 
+    let treatmentsQuery = `SELECT Id, Ratio FROM Treatments`;
+    let patientCountQuery = `SELECT TreatmentId, SUM(Patients) AS PatientCount FROM DHIS2 WHERE FacilityId = @FacilityId GROUP BY TreatmentId`;
+    let timePerTreatmentQuery = `SELECT TreatmentId, CadreId, SUM(MinutesPerPatient) AS TreatmentTime FROM TreatmentSteps INNER JOIN TimeOnTask ON TreatmentSteps.TaskId = TimeOnTask.Id GROUP BY TreatmentId, CadreId`;
 
+    new sql.Request()
+        .input('FacilityId', sql.Int, req.body.facilityId)
+        .query(`${treatmentsQuery}; ${patientCountQuery}; ${timePerTreatmentQuery};`)
+        .then(result => {
 
-    let workersNeeded = {};
+            let treatmentsQueryResult = result.recordsets[0];
 
-    sql.query`SELECT Id, Ratio FROM Treatments; SELECT TreatmentId, SUM(Patients) FROM DHIS2 WHERE FacilityId = ${req.body.facilityId} GROUP BY TreatmentId;`
-        .then(result => console.log(result));
+            let patientCountQueryResult = result.recordsets[1];
+            // convert results from query into a dictionary from an array
+            let patientsPerTreatment = {}
+            patientCountQueryResult.forEach(row => {
+                patientsPerTreatment[row['TreatmentId']] = row['PatientCount'];
+            });
 
-    // calculate for each cadre
-    Object.keys(req.body.cadres).forEach(cadreId => {
+            //
+            let timePerTreatmentQueryResult = result.recordsets[2]
 
-        
-            let treatments = {};
-            let timePerTreatment = {};
-            let patientsPerTreatment = {};
+            let workersNeeded = {};
+            Object.keys(req.body.cadres).forEach(cadreId => {
+                let timesPerTreatment = timePerTreatmentQueryResult.filter(val => { return val['CadreId'] == cadreId })
 
-            sql.query`SELECT TreatmentId, SUM(MinutesPerPatient) FROM TreatmentSteps INNER JOIN TimeOnTask ON TreatmentSteps.TaskId = TimeOnTask.Id WHERE CadreId = ${cadreId} GROUP BY TreatmentId`
-                .then(result => console.log(result));
+                let totalHoursNeeded = 0; // This should be per year for all treatments
+                timesPerTreatment.forEach(row => {
+                    totalHoursNeeded += (row['TreatmentTime'] / 60) * patientsPerTreatment[row['TreatmentId']];
+                });
 
+                let hoursAWeek = req.body.cadres[cadreId] * (1 - (req.body.percentageAdminHours / 100));
+                let hoursAYear = hoursAWeek * 52;
 
-          /*  return pool.request()
-                .query('SELECT Id, Ratio FROM Treatments')
-                .then(result => {
+                workersNeeded[cadreId] = totalHoursNeeded / hoursAYear;
+            });
 
-                    console.log(result);
-                    
-                   
-                }).then(result => {
-
-                    console.log(result);
-
-                }).then(result => {
-
-                    console.log(result);
-                }).then(() => {
-                    res.json({ workersNeeded: 0 })
-                });*/
-        //}).then(result => console.log(result));
-
-    });
+            res.json(workersNeeded);
+        });
 });
 
 

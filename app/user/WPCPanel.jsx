@@ -9,10 +9,11 @@ export default class WPCPanel extends React.Component {
 
         this.state = {
             cadres: [],
+            cadreDict: {},
             facilities: [],
-            selectedCadres: [],
+            selectedCadres: {},
             selectedFacility: 0,
-            cadreHours: [],
+            cadreHours: {},
             percentageAdminHours: 0,
             state: 'form',
             results: null
@@ -21,15 +22,18 @@ export default class WPCPanel extends React.Component {
         axios.get('/user/cadres').then(res => {
             let cadres = res.data;
 
-            let selectedCadres = [];
-            let cadreHours = [];
-            cadres.forEach(() => {
-                selectedCadres.push(true);
-                cadreHours.push(40);
+            let selectedCadres = {};
+            let cadreHours = {};
+            let cadreDict = {};
+            cadres.forEach(cadre => {
+                selectedCadres[cadre.id] = true;
+                cadreHours[cadre.id] = 40;
+                cadreDict[cadre.id] = cadre.name;
             });
 
             this.setState({
                 cadres: cadres,
+                cadreDict: cadreDict,
                 selectedCadres: selectedCadres,
                 cadreHours: cadreHours
             });
@@ -46,7 +50,7 @@ export default class WPCPanel extends React.Component {
 
     }
 
-    checkboxChange(index) {
+    checkboxChange(id) {
         let selectedCadres = this.state.selectedCadres;
         selectedCadres[index] = !selectedCadres[index];
 
@@ -80,14 +84,14 @@ export default class WPCPanel extends React.Component {
             };
 
             this.state.cadres.forEach((cadre, i) => {
-                if (this.state.selectedCadres[i]) {
-                    data.cadres[i] = parseFloat(this.state.cadreHours[i])
+                if (this.state.selectedCadres[cadre.id]) {
+                    data.cadres[cadre.id] = parseFloat(this.state.cadreHours[cadre.id])
                 }
             });
 
             // send the calculate workforce request
             axios.post('/user/workforce', data).then(res => {
-
+                
                 this.setState({
                     results: res.data,
                     state: 'results'
@@ -115,21 +119,21 @@ export default class WPCPanel extends React.Component {
                 <FormGroup>
                     <Col componentClass={ControlLabel} sm={3}>Cadres</Col>
                     <Col sm={8}>
-                        {(this.state.cadres.map((cadre, i) =>
-                            <Row key={i} style={{ padding: 2 }}>
+                        {(this.state.cadres.map(cadre =>
+                            <Row key={cadre.id} style={{ padding: 2 }}>
                                 <Col xs={4}>
                                     <Checkbox
-                                        checked={this.state.selectedCadres[i]}
-                                        onChange={() => this.checkboxChange(i)}
+                                        checked={this.state.selectedCadres[cadre.id]}
+                                        onChange={() => this.checkboxChange(cadre.id)}
                                     >{cadre.name}
                                     </Checkbox>
                                 </Col>
                                 <Col xs={3}>
-                                    {this.state.selectedCadres[i] &&
-                                        <FormControl type="number" onChange={e => this.cadreHoursChanged(e, i)} value={this.state.cadreHours[i]} />}
+                                    {this.state.selectedCadres[cadre.id] &&
+                                        <FormControl type="number" onChange={e => this.cadreHoursChanged(e, cadre.id)} value={this.state.cadreHours[cadre.id]} />}
                                 </Col>
                                 <Col xs={3}>
-                                    {this.state.selectedCadres[i] && <h5>hours/week</h5>}
+                                    {this.state.selectedCadres[cadre.id] && <h5>hours/week</h5>}
                                 </Col>
                             </Row>
                         ))}
@@ -153,7 +157,7 @@ export default class WPCPanel extends React.Component {
     renderLoading() {
         return (
             <div style={{ marginTop: 120, marginBottom: 65 }}>
-                <div class="loader"></div>
+                <div className="loader"></div>
             </div>
         );
     }
@@ -164,10 +168,14 @@ export default class WPCPanel extends React.Component {
                 <h3>Results</h3>
                 <Row>
                     <Col xs={8}>
-                        <h4>Workers Needed</h4>
+                        {Object.keys(this.state.results).map(cadreId =>
+                            <h4 key={cadreId}>{this.state.cadreDict[cadreId]}</h4>
+                        )}
                     </Col>
                     <Col xs={4}>
-                        <h4>{this.state.results.workersNeeded}</h4>
+                        {Object.keys(this.state.results).map(cadreId =>
+                            <h4 key={cadreId}>{this.state.results[cadreId]}</h4>
+                        )}
                     </Col>
                 </Row>
                 <br />
