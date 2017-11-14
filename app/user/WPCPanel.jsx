@@ -14,7 +14,7 @@ export default class WPCPanel extends React.Component {
             selectedCadres: {},
             selectedFacility: 0,
             cadreHours: {},
-            percentageAdminHours: 0,
+            percentageAdminHours: '0',
             state: 'form',
             results: null
         };
@@ -180,7 +180,7 @@ export default class WPCPanel extends React.Component {
                 </Row>
                 <br />
                 <div style={{ textAlign: "right" }}>
-                    <Button onClick={() => this.setState({ state: 'form' })}>Back</Button>
+                    <Button onClick={() => this.setState({ state: 'form', results: null })}>Back</Button>
                 </div>
             </div>
         )

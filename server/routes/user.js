@@ -93,7 +93,7 @@ router.post('/workforce', (req, res) => {
             });
 
             res.json(workersNeeded);
-        });
+        }).catch(err => console.log(err));
 });
 
 
