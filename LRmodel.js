@@ -1,7 +1,7 @@
 //https://github.com/luccastera/shaman : GitHub Repo Reference
 // https://plot.ly/javascript/reference/#scatter : plotly options
 
-var LinearRegression = require('../index').LinearRegression;
+var LinearRegression = require('./index').LinearRegression;
 var _ = require('underscore');
 var apiKey = 'CsOcANaMMMKqbzHRj6F2'//process.env.PLOTLY_API_KEY;
 var username ='nbalaji'; //process.env.PLOTLY_USERNAME;
