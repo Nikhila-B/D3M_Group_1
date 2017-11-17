@@ -43,7 +43,7 @@ router.post('/', (req, res) => {
         },
         series2: {
             x: x2,
-            y2: y2
+            y: y2
         }
     });
 });
