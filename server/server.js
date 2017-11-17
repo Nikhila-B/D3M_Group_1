@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+// start db
+require('./dbconn');
+
 // import our routes
 const user = require('./routes/user');
 const admin = require('./routes/admin');

@@ -21,7 +21,9 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
-    "mssql": "^4.1.0"
+    "mssql": "^4.1.0",
+    "sylvester": "0.0.21",
+    "underscore": "1.7.0"
   },
   "devDependencies": {
     "axios": "^0.17.0",
@@ -35,8 +37,6 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "recharts": "^1.0.0-beta.1",
-    "sylvester": "0.0.21",
-    "underscore": "1.7.0",
     "webpack": "^3.8.1"
   }
 }
