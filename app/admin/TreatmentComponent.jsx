@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Panel, Form, FormGroup, ControlLabel, Button, FormControl, Col, Checkbox, Table } from 'react-bootstrap';
-
+import { Link } from 'react-router-dom'
 
 export default class TreatmentComponent extends React.Component {
 
@@ -15,15 +15,18 @@ export default class TreatmentComponent extends React.Component {
     renderTasks() {
         if (this.state.displayTasks) {
             return (
-                <ol>
-                    {this.props.tasks.map((task, i) =>
-                        <li key={i}>{task}</li>
-                    )}
-                </ol>
-
+                <div>
+                    <a>Hide Treatment Steps</a>
+                    <br />
+                    <ol>
+                        {this.props.tasks.map((task, i) =>
+                            <li key={i}>{task}</li>
+                        )}
+                    </ol>
+                </div>
             );
         } else {
-            return <a>View Tasks ({this.props.tasks.length})</a>
+            return <a>View Treatment Steps ({this.props.tasks.length})</a>
         }
     }
 
@@ -33,7 +36,9 @@ export default class TreatmentComponent extends React.Component {
                 <td>{this.props.name}</td>
                 <td className="show-pointer" onClick={() => this.setState({ displayTasks: !this.state.displayTasks })}> {this.renderTasks()}</td>
                 <td>
-                    <Button onClick={() => this.props.manage()}>Manage Tasks</Button>
+                    <Link to={this.props.manageLink}>
+                        <Button onClick={() => this.props.manage()}>Manage Treatment Steps</Button>
+                    </Link>
                     <Button onClick={() => this.props.delete()}>Delete</Button>
                 </td>
             </tr>

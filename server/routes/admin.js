@@ -39,7 +39,7 @@ router.post('/treatments', (req, res) => {
         .input('Treatment', sql.NVarChar, req.body.name)
         .query(`INSERT INTO Treatments (Treatment, Ratio)
                     VALUES (@Treatment, 1); 
-                SELECT * FROM Treatments 
+                SELECT Id AS id, Treatment as treatment, Ratio AS ratio FROM Treatments 
                     WHERE Id = SCOPE_IDENTITY()`)
         .then(results => res.json(results.recordset[0]))
         .catch(err => res.sendStatus(500));
@@ -57,9 +57,8 @@ router.patch('/treatments/:id', (req, res) => {
                     WHERE Id = @Id`)
         .then(results => res.json(results.recordset[0]))
         .catch(err => res.sendStatus(500))
-})
+});
 
-/*
 // delete treatment
 router.delete('/treatments/:id', (req, res) => {
     new sql.Request()
@@ -68,7 +67,7 @@ router.delete('/treatments/:id', (req, res) => {
                 DELETE FROM Treatments WHERE Id=@Id`)
         .then(results => res.sendStatus(200))
         .catch(err => res.sendStatus(500));
-}); */
+});
 
 /*************** (time on) tasks ****************/
 
@@ -131,7 +130,7 @@ router.delete('/task/:id', (req, res) => {
 router.get('/:treatmentId/steps', (req, res) => {
     new sql.Request()
         .input('Id', sql.Int, req.params.treatmentId)
-        .query(`SELECT Id, TaskId, CadreId FROM TreatmentSteps
+        .query(`SELECT Id AS id, TaskId AS taskId, CadreId AS cadreId FROM TreatmentSteps
                     WHERE TreatmentSteps.TreatmentID=@Id`)
         .then(results => res.json(results.recordset))
         .catch(err => res.sendStatus(500));
