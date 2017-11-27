@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Nikhila-B/D3M_Group_1#readme",
   "dependencies": {
+    "base64-url": "^2.0.1",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "mssql": "^4.1.0",
