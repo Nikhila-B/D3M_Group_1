@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Panel, Form, FormGroup, ControlLabel, Button, FormControl, Col, Checkbox, Table } from 'react-bootstrap';
+import { Panel, Form, FormGroup, ControlLabel, Button, FormControl, Col, Row, Checkbox, Table } from 'react-bootstrap';
 import * as axios from 'axios';
-import { Route, Redirect, Switch, Link } from 'react-router-dom'
+import { Route, Redirect, Switch, Link } from 'react-router-dom';
 
 import NewTreatmentComponent from './NewTreatmentComponent';
 import TreatmentComponent from './TreatmentComponent';
+import NewStepComponent from './NewStepComponent';
 
 export default class TreatmentPanel extends React.Component {
 
@@ -15,7 +16,8 @@ export default class TreatmentPanel extends React.Component {
             tasks: {},
             cadres: {},
             treatments: {},
-            showingNewTask: false,
+            showingNewTreatment: false,
+            showingNewStep: false,
             treatmentSteps: []
         };
 
@@ -38,10 +40,19 @@ export default class TreatmentPanel extends React.Component {
         }).catch(err => console.log(err));
     }
 
+    componentWillReceiveProps(newProps) {
+        // update our treatments incase one was edited
+        if (newProps.location != this.props.location
+            && newProps.location.pathname.endsWith("admin")) {
+            axios.get('/admin/treatments')
+                .then(res => this.setState({ treatments: res.data }))
+                .catch(err => console.log(err));
+        }
+    }
+
     manageTreatmentSteps(treatmentId) {
         this.setState({ treatmentSteps: [] });
         axios.get(`/admin/${treatmentId}/steps`).then(res => {
-            console.log(res.data);
             this.setState({ treatmentSteps: res.data });
         }).catch(err => console.log(err));
     }
@@ -55,7 +66,7 @@ export default class TreatmentPanel extends React.Component {
     }
 
     newTreatmentSave(name) {
-        this.setState({ showingNewTask: false });
+        this.setState({ showingNewTreatment: false });
         axios.post('/admin/treatments/', {
             name: name
         }).then(res => {
@@ -68,13 +79,35 @@ export default class TreatmentPanel extends React.Component {
         }).catch(err => console.log(err));
     }
 
+    newStepSave(treatmentId, info) {
+        this.setState({ showingNewStep: false });
+
+        axios.post(`/admin/${treatmentId}/steps`, {
+            taskId: parseInt(info.taskId),
+            cadreId: parseInt(info.cadreId)
+        }).then(res => {
+            let treatmentSteps = this.state.treatmentSteps;
+            treatmentSteps.push(res.data);
+            this.setState({ treatmentSteps: treatmentSteps });
+        }).catch(err => console.log(err));
+    }
+
+    deleteStep(treatmentId, stepId) {
+        axios.delete(`/admin/${treatmentId}/steps/${stepId}`).then(res => {
+            let treatmentSteps = this.state.treatmentSteps;
+            let index = treatmentSteps.findIndex(step => step.id == stepId);
+            delete treatmentSteps[index];
+            this.setState({ treatmentSteps: treatmentSteps })
+        }).catch(err => console.log(err));
+    }
+
     renderTreatments() {
         return (
             <div>
                 <div style={{ textAlign: "right", paddingBottom: 4 }}>
                     <Button
-                        disabled={this.state.showingNewTask}
-                        onClick={() => this.setState({ showingNewTask: true })}>
+                        disabled={this.state.showingNewTreatment}
+                        onClick={() => this.setState({ showingNewTreatment: true })}>
                         Add
                     </Button>
                 </div>
@@ -97,10 +130,10 @@ export default class TreatmentPanel extends React.Component {
                                 delete={() => this.deleteTreatment(id)}
                             />
                         )}
-                        {this.state.showingNewTask &&
+                        {this.state.showingNewTreatment &&
                             <NewTreatmentComponent
                                 save={name => this.newTreatmentSave(name)}
-                                cancel={() => this.setState({ showingNewTask: false })} />}
+                                cancel={() => this.setState({ showingNewTreatment: false })} />}
                     </tbody>
                 </Table>
             </div>
@@ -111,11 +144,47 @@ export default class TreatmentPanel extends React.Component {
         return (
             <div>
                 <h3>{this.state.treatments[route.match.params.id].treatment}</h3>
-                <ol>
-                    {this.state.treatmentSteps.map(step =>
-                        <ol key={step.id}>{this.state.tasks[step.taskId].task} - {this.state.cadres[step.cadreId]}</ol>
-                    )}
-                </ol>
+                <Row>
+                    <Col xs={10}>
+                        <Table bordered hover>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: "50%" }}>Task Name</th>
+                                    <th style={{ width: "30%" }}>Cadre</th>
+                                    <th style={{ width: "20%" }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.treatmentSteps.map(step =>
+                                    <tr key={step.id}>
+                                        <td>{this.state.tasks[step.taskId].task}</td>
+                                        <td> {this.state.cadres[step.cadreId]}</td>
+                                        <td>
+                                            <Button
+                                                onClick={() => this.deleteStep(route.match.params.id, step.id)}>
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                )}
+                                {this.state.showingNewStep &&
+                                    <NewStepComponent
+                                        tasks={this.state.tasks}
+                                        cadres={this.state.cadres}
+                                        save={info => this.newStepSave(route.match.params.id, info)}
+                                        cancel={() => this.setState({ showingNewStep: false })}
+                                    />}
+                            </tbody>
+                        </Table>
+                    </Col>
+                    <Col xs={2}>
+                        <Button
+                            onClick={() => this.setState({ showingNewStep: true })}
+                            disabled={this.state.showingNewStep}>
+                            Add Step
+                        </Button>
+                    </Col>
+                </Row>
             </div>
         );
     }

@@ -140,11 +140,11 @@ router.get('/:treatmentId/steps', (req, res) => {
 router.post('/:treatmentId/steps', (req, res) => {
     new sql.Request()
         .input('TreatmentId', sql.Int, req.params.treatmentId)
-        .input('TaskId', sql.NVarChar, req.body.taskId)
+        .input('TaskId', sql.Int, req.body.taskId)
         .input('CadreId', sql.Int, req.body.cadreId)
         .query(`INSERT INTO TreatmentSteps (TreatmentId, TaskId, CadreId)
                     VALUES (@TreatmentId, @TaskId, @CadreId);
-                SELECT Id, TaskId, CadreId FROM TreatmentSteps
+                SELECT Id as id, TaskId as taskId, CadreId as cadreId FROM TreatmentSteps
                     WHERE Id = SCOPE_IDENTITY()`)
         .then(results => res.json(results.recordset[0]))
         .catch(err => res.sendStatus(500));
