@@ -48,4 +48,22 @@ router.post('/', (req, res) => {
     });
 });
 
+/*get all the rows/relevant records related to healthcare categories for LR chart
+------ x-axis = will be years [2000 - 2016] | predict[upto 2020] : FIXED
+------ y-axis = will be the numbers values : need to edit */
+router.get('/LRcharts', (req, res) => {
+    new sql.Request()
+        .query(`select k.tagword, t.[Indicator Name], t.[Country Name], t.[2000],
+        t.[2001], t.[2002], t.[2003], t.[2004], t.[2005],
+        t.[2006], t.[2007], t.[2008],t.[2009], t.[2010],
+        t.[2011], t.[2012], t.[2013], t.[2014], t.[2015],
+        t.[2016]
+        from [dbo].[keyWords] k, (select * from [dbo].[WDIData] where [Country Code] = 'UGA') as t
+        where t.[Indicator Name] LIKE '%'+ k.tagword +'%';'`)
+        .then(result => res.json(result.recordset))
+        .catch(err => res.sendStatus(500));
+});
+
+
+
 module.exports = router;
