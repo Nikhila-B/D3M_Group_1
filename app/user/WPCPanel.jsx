@@ -52,7 +52,7 @@ export default class WPCPanel extends React.Component {
 
     checkboxChange(id) {
         let selectedCadres = this.state.selectedCadres;
-        selectedCadres[index] = !selectedCadres[index];
+        selectedCadres[id] = !selectedCadres[id];
 
         this.setState({
             selectedCadres: selectedCadres
@@ -188,7 +188,7 @@ export default class WPCPanel extends React.Component {
 
     render() {
         return (
-            <div style={{ width: "70%", margin: "0 auto 0" }}>
+            <div style={{ width: "80%", margin: "0 auto 0" }}>
                 {this.state.state == 'form' && this.renderForm()}
                 {this.state.state == 'loading' && this.renderLoading()}
                 {this.state.state == 'results' && this.renderResults()}
