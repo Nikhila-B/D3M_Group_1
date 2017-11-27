@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Panel, Form, FormGroup, ControlLabel, Row, FormControl, Col, Checkbox, Button } from 'react-bootstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import axios from 'axios';
+import * as base64 from 'base64-url'
 
 export default class PredictivePanel extends React.Component {
 
@@ -9,36 +10,91 @@ export default class PredictivePanel extends React.Component {
         super(props);
 
         this.state = {
-            data: null
+            tagwords: {},
+            selectedTagword: null,
+            selectedIndicator: null
         };
 
-        axios.post('/user/predictive').then(res => {
-            let data = {};
-
-            for (let i = 0; i < res.data.series1.x.length; i++) {
-                data[res.data.series1.x[i]] = {
-                    name: res.data.series1.x[i],
-                    s1: res.data.series1.y[i]
-                };
-            }
-
-            for (let i = 0; i < res.data.series2.x.length; i++) {
-                data[res.data.series2.x[i]] = {
-                    name: res.data.series2.x[i],
-                    s2: res.data.series2.y[i]
-                };
-            }
-
-            this.setState({ data: Object.values(data) });
+        axios.get('/user/predictive/lrcharts/indicators').then(res => {
+            this.setState({ tagwords: res.data });
         }).catch(err => console.log(err));
+
+        /* axios.post('/user/predictive').then(res => {
+             let data = {};
+ 
+             for (let i = 0; i < res.data.series1.x.length; i++) {
+                 data[res.data.series1.x[i]] = {
+                     name: res.data.series1.x[i],
+                     s1: res.data.series1.y[i]
+                 };
+             }
+ 
+             for (let i = 0; i < res.data.series2.x.length; i++) {
+                 data[res.data.series2.x[i]] = {
+                     name: res.data.series2.x[i],
+                     s2: res.data.series2.y[i]
+                 };
+             }
+ 
+             this.setState({ data: Object.values(data) });
+         }).catch(err => console.log(err)); */
 
 
     }
 
+    selectTagword(value) {
+        this.setState({
+            selectedTagword: value,
+            selectedIndicator: this.state.tagwords[value][0]
+        })
+    }
+
+    calculate() {
+        axios.get(`/user/predictive/lrcharts/${base64.encode(this.state.selectedIndicator)}`)
+            .then(res => {
+                console.log(res);
+
+                let data = [];
+
+                Object.keys(res.data).map(year => {
+                    data.push({
+                        name: year,
+                        s1: res.data[year]
+                    });
+                })
+
+
+                this.setState({ data: data })
+
+            })
+            .catch(err => console.log(err));
+    }
 
     render() {
         return (
             <div style={{ margin: "0 auto 0" }}>
+                <FormControl componentClass="select"
+                    onChange={e => this.selectTagword(e.target.value)}>
+                    {Object.keys(this.state.tagwords).map(tagword =>
+                        <option key={tagword} value={tagword}>{tagword}</option>
+                    )}
+                </FormControl>
+                {this.state.selectedTagword &&
+                    <FormControl componentClass="select"
+                        onChange={e => this.setState({ selectedIndicator: e.target.value })}>
+                        {this.state.tagwords[this.state.selectedTagword].map(indicator =>
+                            <option
+                                key={indicator}
+                                value={indicator}>
+                                {indicator}
+                            </option>
+                        )}
+                    </FormControl>
+                }
+                {this.state.selectedIndicator &&
+                    <Button onClick={() => this.calculate()}>Calculate</Button>
+                }
+
                 {this.state.data && <LineChart width={600} height={300} data={this.state.data}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <XAxis dataKey="name" />
