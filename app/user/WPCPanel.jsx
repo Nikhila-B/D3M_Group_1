@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Panel, Form, FormGroup, ControlLabel, Row, FormControl, Col, Checkbox, Button } from 'react-bootstrap';
+import { Panel, Form, FormGroup, ControlLabel, Row, FormControl, Col, Checkbox, Button, Table } from 'react-bootstrap';
 import axios from 'axios';
 
 export default class WPCPanel extends React.Component {
@@ -10,11 +10,13 @@ export default class WPCPanel extends React.Component {
         this.state = {
             cadres: [],
             cadreDict: {},
+            cadreInputs: {},
             facilities: [],
-            selectedCadres: {},
             selectedFacility: 0,
-            cadreHours: {},
-            percentageAdminHours: '0',
+            treatments: [],
+            treatmentsSelected: {},
+            treatmentFilter: "",
+            treatmentToggle: true,
             state: 'form',
             results: null
         };
@@ -22,51 +24,87 @@ export default class WPCPanel extends React.Component {
         axios.get('/user/cadres').then(res => {
             let cadres = res.data;
 
-            let selectedCadres = {};
-            let cadreHours = {};
+            let cadreInputs = {};
             let cadreDict = {};
             cadres.forEach(cadre => {
-                selectedCadres[cadre.id] = true;
-                cadreHours[cadre.id] = 40;
+                cadreInputs[cadre.id] = {
+                    selected: true,
+                    hours: 40,
+                    adminPercentage: 15
+                }
                 cadreDict[cadre.id] = cadre.name;
             });
 
             this.setState({
                 cadres: cadres,
                 cadreDict: cadreDict,
-                selectedCadres: selectedCadres,
-                cadreHours: cadreHours
+                cadreInputs: cadreInputs
             });
         }).catch(err => console.log(err));
 
-        axios.get('/user/facilities').then(res => {
-            let facilities = res.data;
+        axios.get('/user/facilities')
+            .then(res => this.setState({ facilities: res.data }))
+            .catch(err => console.log(err));
 
-            this.setState({
-                facilities: facilities
-            });
-
-        }).catch(err => console.log(err));
+        axios.get('/user/treatments')
+            .then(res => {
+                let treatmentsSelected = {};
+                res.data.forEach(treatment => {
+                    treatmentsSelected[treatment.id] = true
+                });
+                this.setState({
+                    treatments: res.data,
+                    treatmentsSelected: treatmentsSelected
+                });
+            })
+            .catch(err => console.log(err));
 
     }
 
-    checkboxChange(id) {
-        let selectedCadres = this.state.selectedCadres;
-        selectedCadres[id] = !selectedCadres[id];
+    cadreCheckboxChange(id) {
+        let cadreInputs = this.state.cadreInputs;
+        cadreInputs[id].selected = !cadreInputs[id].selected;
 
-        this.setState({
-            selectedCadres: selectedCadres
+        this.setState({ cadreInputs: cadreInputs });
+    }
+
+    cadreHoursChanged(e, id) {
+        let cadreInputs = this.state.cadreInputs;
+        cadreInputs[id].hours = e.target.value;
+        this.setState({ cadreInputs: cadreInputs });
+    }
+
+    cadreAdminAmtChanged(e, id) {
+        let cadreInputs = this.state.cadreInputs;
+        cadreInputs[id].adminPercentage = e.target.value;
+        this.setState({ cadreInputs: cadreInputs });
+    }
+
+    filterTreatments() {
+        return this.state.treatments.filter(treatment => {
+            let name = treatment['treatment'].toUpperCase();
+            let filter = this.state.treatmentFilter.toUpperCase();
+            return name.indexOf(filter) > -1;
         });
     }
 
-    cadreHoursChanged(e, i) {
-        let cadreHours = this.state.cadreHours;
-        cadreHours[i] = e.target.value;
-        this.setState({ cadreHours: cadreHours });
+    treatmentCheckboxChanged(id) {
+        let treatmentsSelected = this.state.treatmentsSelected;
+        treatmentsSelected[id] = !treatmentsSelected[id];
+        this.setState({ treatmentsSelected: treatmentsSelected });
     }
 
-    cadreAdminAmtChanged(e) {
-        this.setState({ percentageAdminHours: e.target.value });
+    toggleTreatments() {
+        let treatmentToggle = !this.state.treatmentToggle;
+        let treatmentsSelected = this.state.treatmentsSelected;
+        this.state.treatments.forEach(treatment => {
+            treatmentsSelected[treatment.id] = treatmentToggle;
+        })
+
+        this.setState({
+            treatmentToggle: treatmentToggle,
+            treatmentsSelected: treatmentsSelected
+        });
     }
 
     calculateClicked() {
@@ -80,18 +118,20 @@ export default class WPCPanel extends React.Component {
             let data = {
                 facilityId: this.state.selectedFacility,
                 cadres: {},
-                percentageAdminHours: parseFloat(this.state.percentageAdminHours)
+                treatments: this.state.treatmentsSelected
             };
 
-            this.state.cadres.forEach((cadre, i) => {
-                if (this.state.selectedCadres[cadre.id]) {
-                    data.cadres[cadre.id] = parseFloat(this.state.cadreHours[cadre.id])
+            this.state.cadres.forEach(cadre => {
+                if (this.state.cadreInputs[cadre.id].selected) {
+                    data.cadres[cadre.id] = {
+                        hours: parseFloat(this.state.cadreInputs[cadre.id].hours),
+                        adminPercentage: parseFloat(this.state.cadreInputs[cadre.id].adminPercentage)
+                    };
                 }
             });
 
             // send the calculate workforce request
             axios.post('/user/workforce', data).then(res => {
-                
                 this.setState({
                     results: res.data,
                     state: 'results'
@@ -103,11 +143,12 @@ export default class WPCPanel extends React.Component {
     renderForm() {
         return (
             <Form horizontal>
+                <br />
                 <FormGroup>
-                    <Col componentClass={ControlLabel} sm={3}>
+                    <Col componentClass={ControlLabel} sm={2}>
                         Facility
                     </Col>
-                    <Col sm={8}>
+                    <Col sm={10}>
                         <FormControl componentClass="select"
                             onChange={e => this.setState({ selectedFacility: e.target.value })}>
                             {(this.state.facilities.map((facility, i) =>
@@ -116,41 +157,104 @@ export default class WPCPanel extends React.Component {
                         </FormControl>
                     </Col>
                 </FormGroup>
+                <hr />
                 <FormGroup>
-                    <Col componentClass={ControlLabel} sm={3}>Cadres</Col>
-                    <Col sm={8}>
-                        {(this.state.cadres.map(cadre =>
-                            <Row key={cadre.id} style={{ padding: 2 }}>
-                                <Col xs={4}>
-                                    <Checkbox
-                                        checked={this.state.selectedCadres[cadre.id]}
-                                        onChange={() => this.checkboxChange(cadre.id)}
-                                    >{cadre.name}
-                                    </Checkbox>
-                                </Col>
-                                <Col xs={3}>
-                                    {this.state.selectedCadres[cadre.id] &&
-                                        <FormControl type="number" onChange={e => this.cadreHoursChanged(e, cadre.id)} value={this.state.cadreHours[cadre.id]} />}
-                                </Col>
-                                <Col xs={3}>
-                                    {this.state.selectedCadres[cadre.id] && <h5>hours/week</h5>}
-                                </Col>
-                            </Row>
-                        ))}
+                    <Col componentClass={ControlLabel} sm={2}>Cadres</Col>
+                    <Col sm={10}>
+                        <Table striped hover>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: "10%" }}>Include</th>
+                                    <th style={{ width: "40%" }}>Cadre</th>
+                                    <th style={{ width: "20%" }}>Hours/Week</th>
+                                    <th style={{ width: "30%" }}>Percentage of time spend on administrative tasks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.cadres.map(cadre =>
+                                    <tr key={cadre.id}>
+                                        <td>
+                                            <Checkbox
+                                                checked={this.state.cadreInputs[cadre.id].selected}
+                                                onChange={() => this.cadreCheckboxChange(cadre.id)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <h5>{cadre.name}</h5>
+                                        </td>
+                                        <td>
+                                            <FormControl
+                                                type="number"
+                                                style={{ width: 75 }}
+                                                disabled={!this.state.cadreInputs[cadre.id].selected}
+                                                value={this.state.cadreInputs[cadre.id].hours}
+                                                onChange={e => this.cadreHoursChanged(e, cadre.id)} />
+                                        </td>
+                                        <td>
+                                            <FormControl
+                                                type="number"
+                                                style={{ width: 75 }}
+                                                disabled={!this.state.cadreInputs[cadre.id].selected}
+                                                value={this.state.cadreInputs[cadre.id].adminPercentage}
+                                                onChange={e => this.cadreAdminAmtChanged(e, cadre.id)} />
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
                     </Col>
                 </FormGroup>
+                <hr />
                 <FormGroup>
-                    <Col componentClass={ControlLabel} sm={3}>
-                        % of time spent of admin task
-                    </Col>
-                    <Col sm={8}>
-                        <FormControl type="text" value={this.state.percentageAdminHours} onChange={e => this.cadreAdminAmtChanged(e)} />
+                    <Col componentClass={ControlLabel} sm={2}>Treatments</Col>
+                    <Col sm={10}>
+                        <Row>
+                            <Col xs={3}>
+                                <FormControl
+                                    type="text"
+                                    placeholder="filter treatments"
+                                    value={this.state.treatmentFilter}
+                                    onChange={e => this.setState({ treatmentFilter: e.target.value })} />
+                                <div style={{ textAlign: "right", paddingTop: 5 }}>
+                                    <Button onClick={() => this.toggleTreatments()}>
+                                        {this.state.treatmentToggle ? "Unselect" : "Select"} All
+                                    </Button>
+                                </div>
+                            </Col>
+                            <Col xs={9}>
+                                <div style={{ overflowY: "scroll", minHeight: 250, maxHeight: 250 }}>
+                                    <Table striped hover>
+                                        <thead>
+                                            <tr>
+                                                <th style={{ width: "15%" }}>Include</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.filterTreatments().map(treatment =>
+                                                <tr key={treatment['id']}>
+                                                    <td>
+                                                        <Checkbox
+                                                            checked={this.state.treatmentsSelected[treatment['id']]}
+                                                            onChange={() => this.treatmentCheckboxChanged(treatment['id'])} />
+                                                    </td>
+                                                    <td>
+                                                        <h5>{treatment['treatment']}</h5>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </Col>
+                        </Row>
                     </Col>
                 </FormGroup>
-                <div style={{ textAlign: "right" }}>
+                <hr />
+                <div style={{ textAlign: "right", paddingTop: 10 }}>
                     <Button onClick={() => this.calculateClicked()}>Calculate</Button>
                 </div>
-            </Form>
+            </Form >
         );
     }
 
@@ -188,7 +292,7 @@ export default class WPCPanel extends React.Component {
 
     render() {
         return (
-            <div style={{ width: "80%", margin: "0 auto 0" }}>
+            <div style={{ width: "85%", margin: "0 auto 0" }}>
                 {this.state.state == 'form' && this.renderForm()}
                 {this.state.state == 'loading' && this.renderLoading()}
                 {this.state.state == 'results' && this.renderResults()}

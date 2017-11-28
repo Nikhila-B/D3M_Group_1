@@ -3,11 +3,20 @@ const sql = require('mssql');
 let router = require('express').Router();
 
 router.post('/', (req, res) => {
-
+    
     /* what req.body looks like:
-        { facilityId: '7',
-          cadres: { '0': 40, '1': 50, '2': 35 },
-          percentageAdminHours: 30 }
+        { facilityId: '8',
+  cadres:
+   { '1': { hours: 40, adminPercentage: 17 },
+     '2': { hours: 43, adminPercentage: 15 } },
+  treatments:
+   { '1': true,
+     '2': false,
+     '3': true,
+     '15': true,
+     '16': true,
+     '17': true,
+     '18': true } }
     */
 
     let treatmentsQuery = `SELECT Id, Ratio FROM Treatments`;
@@ -31,10 +40,10 @@ router.post('/', (req, res) => {
 
             // set to zero if treatment has no patients
             treatmentsQueryResult.forEach(row => {
-                if(!patientsPerTreatment[row['Id']]) {
+                if (!patientsPerTreatment[row['Id']]) {
                     patientsPerTreatment[row['Id']] = 0
                 }
-            })
+            });
 
             let workersNeeded = {};
             Object.keys(req.body.cadres).forEach(cadreId => {
@@ -45,7 +54,11 @@ router.post('/', (req, res) => {
                     totalHoursNeeded += (row['TreatmentTime'] / 60) * patientsPerTreatment[row['TreatmentId']];
                 });
 
-                let hoursAWeek = req.body.cadres[cadreId] * (1 - (req.body.percentageAdminHours / 100));
+                // input parameters
+                let cadreHours = req.body.cadres[cadreId].hours;
+                let cadreAdminPercentage = req.body.cadres[cadreId].adminPercentage;
+
+                let hoursAWeek = cadreHours * (1 - (cadreAdminPercentage / 100));
                 let hoursAYear = hoursAWeek * 52;
 
                 workersNeeded[cadreId] = totalHoursNeeded / hoursAYear;

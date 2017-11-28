@@ -21,6 +21,13 @@ router.get('/cadres', (req, res) => {
         .catch(err => res.sendStatus(500));
 });
 
+router.get('/treatments', (req, res) => {
+    new sql.Request()
+        .query(`SELECT Id AS id, Treatment AS treatment FROM Treatments`)
+        .then(results => res.json(results.recordset))
+        .catch(err => res.sendStatus(500));
+});
+
 // analytics
 router.use('/workforce', workforceRoute);
 router.use('/predictive', predictiveRoute);
