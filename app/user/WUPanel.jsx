@@ -32,19 +32,21 @@ export default class WUPanel extends React.Component {
 
     render() {
         return (
-            <div style={{ margin: "0 auto 0" }}>
+            <div>
                 {this.state.data &&
-                    <BarChart width={700} height={300} data={this.state.data}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <Tooltip />
-                        <Legend />
-                        {this.state.cadres.map((cadre, i) =>
-                            <Bar dataKey={cadre} stackId="a" fill={colorList[i]} />
-                        )}
-                    </BarChart>
+                    <div style={{ margin: "0 auto 0", width: 700 }}>
+                        <BarChart width={700} height={300} data={this.state.data}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <Tooltip />
+                            <Legend />
+                            {this.state.cadres.map((cadre, i) =>
+                                <Bar key={i} dataKey={cadre} stackId="a" fill={colorList[i]} />
+                            )}
+                        </BarChart>
+                    </div>
                 }
             </div>
         );
