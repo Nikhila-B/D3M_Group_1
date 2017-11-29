@@ -20,9 +20,13 @@ router.post('/', (req, res) => {
     */
 
     let treatmentsQuery = `SELECT Id, Ratio FROM Treatments`;
-    let patientCountQuery = `SELECT TreatmentId, SUM(Patients) AS PatientCount FROM DHIS2 WHERE FacilityId = @FacilityId GROUP BY TreatmentId`;
+    let patientCountQuery = `SELECT TreatmentId, SUM(Patients) AS PatientCount 
+                                FROM DHIS2
+                                WHERE CONCAT([Year], [QUARTER])=ANY(SELECT DISTINCT TOP 4 CONCAT([Year], [Quarter]) FROM DHIS2 WHERE FacilityId=@FacilityId ORDER BY CONCAT([Year], [QUARTER]) DESC)
+                                    AND FacilityId=@FacilityId
+                                GROUP BY TreatmentId`;
     let timePerTreatmentQuery = `SELECT TreatmentId, CadreId, SUM(MinutesPerPatient) AS TreatmentTime FROM TreatmentSteps INNER JOIN TimeOnTask ON TreatmentSteps.TaskId = TimeOnTask.Id GROUP BY TreatmentId, CadreId`;
-
+    
     new sql.Request()
         .input('FacilityId', sql.Int, req.body.facilityId)
         .query(`${treatmentsQuery}; ${patientCountQuery}; ${timePerTreatmentQuery};`)
