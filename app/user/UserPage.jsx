@@ -4,6 +4,7 @@ import { Panel, Form, FormGroup, ControlLabel, FormControl, Col, Checkbox, Accor
 import WPCPanel from './WPCPanel';
 import PredictivePanel from './PredictivePanel';
 import WUPanel from './WUPanel';
+
 export default class UserPage extends React.Component {
 
     constructor(props) {

@@ -15,30 +15,9 @@ export default class PredictivePanel extends React.Component {
             selectedIndicator: null
         };
 
-        axios.get('/user/predictive/lrcharts/indicators').then(res => {
-            this.setState({ tagwords: res.data });
-        }).catch(err => console.log(err));
-
-        /* axios.post('/user/predictive').then(res => {
-             let data = {};
- 
-             for (let i = 0; i < res.data.series1.x.length; i++) {
-                 data[res.data.series1.x[i]] = {
-                     name: res.data.series1.x[i],
-                     s1: res.data.series1.y[i]
-                 };
-             }
- 
-             for (let i = 0; i < res.data.series2.x.length; i++) {
-                 data[res.data.series2.x[i]] = {
-                     name: res.data.series2.x[i],
-                     s2: res.data.series2.y[i]
-                 };
-             }
- 
-             this.setState({ data: Object.values(data) });
-         }).catch(err => console.log(err)); */
-
+        axios.get('/user/predictive/lrcharts/indicators')
+            .then(res => this.setState({ tagwords: res.data }))
+            .catch(err => console.log(err));
 
     }
 
@@ -76,7 +55,9 @@ export default class PredictivePanel extends React.Component {
                 <FormControl componentClass="select"
                     onChange={e => this.selectTagword(e.target.value)}>
                     {Object.keys(this.state.tagwords).map(tagword =>
-                        <option key={tagword} value={tagword}>{tagword}</option>
+                        <option key={tagword} value={tagword}>
+                            {tagword.substr(0, 1).toUpperCase() + tagword.substr(1).toLowerCase()}
+                        </option>
                     )}
                 </FormControl>
                 {this.state.selectedTagword &&

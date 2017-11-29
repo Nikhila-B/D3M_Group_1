@@ -1,7 +1,8 @@
 const sql = require('mssql');
 
 const workforceRoute = require('./user/workforce');
-const predictiveRoute = require('./user/predictive')
+const predictiveRoute = require('./user/predictive');
+const utilizationRoute = require('./user/utilization');
 
 let router = require('express').Router();
 
@@ -31,5 +32,6 @@ router.get('/treatments', (req, res) => {
 // analytics
 router.use('/workforce', workforceRoute);
 router.use('/predictive', predictiveRoute);
+router.use('/utilization', utilizationRoute);
 
 module.exports = router;
