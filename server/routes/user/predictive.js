@@ -18,7 +18,7 @@ router.get('/lrcharts/indicators', (req, res) => {
             // group all the indicators by tagword
             let tagwords = {};
             result.recordset.forEach(row => {
-                if(tagwords[row['tagword']] == null) {
+                if (tagwords[row['tagword']] == null) {
                     tagwords[row['tagword']] = [];
                 }
                 tagwords[row['tagword']].push(row['indicator']);
@@ -49,13 +49,13 @@ router.get('/lrcharts/:indicator', (req, res) => {
             // remove zero value/ years
             var available_years = [] // x-axis
             var available_value = [] // y-axis
-            for(var i = 0; i < years.length; i++){
-                if(data[''+str(years[i])+ ''] != 0){
+            for (var i = 0; i < years.length; i++) {
+                if (data['' + years[i] + ''] != 0) {
                     available_years.push(years[i])
-                    available_value.push(data[''+str(years[i])+ ''])
+                    available_value.push(data['' + years[i] + ''])
                 }
             }
-          
+
             // Initialize and train the linear regression
             var lr = new LinearRegression(available_years, available_value);
             lr.train(function (err) {
@@ -71,7 +71,7 @@ router.get('/lrcharts/:indicator', (req, res) => {
             x2.forEach(function (xi) {
                 y2.push(lr.predict(xi));
             });
-        
+
             res.json({
                 series1: {
                     x: available_years,
@@ -81,7 +81,6 @@ router.get('/lrcharts/:indicator', (req, res) => {
                     x: x2,
                     y: y2
                 }
-                
             });
 
         }).catch(err => console.log(err))

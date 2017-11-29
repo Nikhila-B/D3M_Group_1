@@ -31,18 +31,23 @@ export default class PredictivePanel extends React.Component {
     calculate() {
         axios.get(`/user/predictive/lrcharts/${base64.encode(this.state.selectedIndicator)}`)
             .then(res => {
-                console.log(res);
+                let data = {};
 
-                let data = [];
+                for (let i = 0; i < res.data.series1.x.length; i++) {
+                    data[res.data.series1.x[i]] = {
+                        name: res.data.series1.x[i],
+                        s1: res.data.series1.y[i]
+                    };
+                }
 
-                Object.keys(res.data).map(year => {
-                    data.push({
-                        name: year,
-                        s1: res.data[year]
-                    });
-                })
+                for (let i = 0; i < res.data.series2.x.length; i++) {
+                    data[res.data.series2.x[i]] = {
+                        name: res.data.series2.x[i],
+                        s2: res.data.series2.y[i]
+                    };
+                }
 
-                this.setState({ data: data })
+                this.setState({ data: Object.values(data) });
             }).catch(err => console.log(err));
     }
 
@@ -102,7 +107,7 @@ export default class PredictivePanel extends React.Component {
                 </Form>
 
                 <hr />
-                
+
                 {this.state.data &&
                     <div style={{ margin: "0 auto 0", width: 600 }}>
                         <LineChart width={600} height={300} data={this.state.data}
@@ -110,7 +115,7 @@ export default class PredictivePanel extends React.Component {
                             <XAxis dataKey="name">
                                 <Label value="Years" offset={0} position="bottom" />
                             </XAxis>
-                            <YAxis label={{ value: "Percent % ", angle: -90, position: "insideLeft"}} />
+                            <YAxis label={{ value: "Percent % ", angle: -90, position: "insideLeft" }} />
                             <CartesianGrid strokeDasharray="3 3" />
                             <Tooltip />
                             <Legend iconType="star" verticalAlign="top" height={45} />
