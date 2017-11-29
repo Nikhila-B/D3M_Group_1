@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Panel, Form, FormGroup, ControlLabel, Row, FormControl, Col, Checkbox, Button } from 'react-bootstrap';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Label } from 'recharts'
 import axios from 'axios';
 import * as base64 from 'base64-url'
 
@@ -107,11 +107,13 @@ export default class PredictivePanel extends React.Component {
                     <div style={{ margin: "0 auto 0", width: 600 }}>
                         <LineChart width={600} height={300} data={this.state.data}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis dataKey="name">
+                                <Label value="Years" offset={0} position="bottom" />
+                            </XAxis>
+                            <YAxis label={{ value: "Percent % ", angle: -90, position: "insideLeft"}} />
                             <CartesianGrid strokeDasharray="3 3" />
                             <Tooltip />
-                            <Legend />
+                            <Legend iconType="star" verticalAlign="top" height={45} />
                             <Line type="monotone" dataKey="s1" stroke="#8884d8" activeDot={{ r: 8 }} />
                             <Line type="monotone" dataKey="s2" stroke="#82ca9d" />
                         </LineChart>
