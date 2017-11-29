@@ -270,18 +270,39 @@ export default class WPCPanel extends React.Component {
         return (
             <div>
                 <h3>Results</h3>
-                <Row>
-                    <Col xs={8}>
-                        {Object.keys(this.state.results).map(cadreId =>
-                            <h4 key={cadreId}>{this.state.cadreDict[cadreId]}</h4>
+                <Table hover striped>
+                    <thead>
+                        <tr>
+                            <th>Cadre</th>
+                            <th>Workers Needed</th>
+                            <th>Workforce Pressure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.keys(this.state.results.workersNeeded).map(cadreId =>
+                            <tr>
+                                <td>
+                                    <h4 key={cadreId}>{this.state.cadreDict[cadreId]}</h4>
+                                </td>
+                                <td>
+                                    <h4 key={cadreId}>{Math.round(this.state.results.workersNeeded[cadreId] + .49999)}</h4>
+                                </td>
+                                <td>
+                                    {this.state.results.pressure[cadreId] &&
+                                        <h4
+                                            key={cadreId}
+                                            style={{ color: this.state.results.pressure[cadreId] < 1 ? "red" : "green" }}>
+                                            {Number(this.state.results.pressure[cadreId]).toFixed(2)}x
+                                        </h4>
+                                    }
+                                    {!this.state.results.pressure[cadreId] &&
+                                        <h4 key={cadreId} style={{ color: "gray" }}>N/A</h4>
+                                    }
+                                </td>
+                            </tr>
                         )}
-                    </Col>
-                    <Col xs={4}>
-                        {Object.keys(this.state.results).map(cadreId =>
-                            <h4 key={cadreId}>{this.state.results[cadreId]}</h4>
-                        )}
-                    </Col>
-                </Row>
+                    </tbody>
+                </Table>
                 <br />
                 <div style={{ textAlign: "right" }}>
                     <Button onClick={() => this.setState({ state: 'form', results: null })}>Back</Button>
