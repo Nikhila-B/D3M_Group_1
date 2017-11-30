@@ -16,13 +16,13 @@ export default class UserPage extends React.Component {
         return (
             <div>
                 <Accordion defaultActiveKey="1">
-                    <Panel header="Work Force Pressure Calculator" eventKey="1">
+                    <Panel bsStyle="primary" header="Work Force Pressure Calculator" eventKey="1">
                         <WPCPanel />
                     </Panel>
-                    <Panel header="Predictive Work Force Pressure Calculator" eventKey="2">
+                    <Panel bsStyle="warning" header="Predictive Work Force Pressure Calculator" eventKey="2">
                         <PredictivePanel />
                     </Panel>
-                    <Panel header="Workforce Utilization" eventKey="3">
+                    <Panel bsStyle="success" header="Workforce Utilization" eventKey="3">
                         <WUPanel />
                     </Panel>
                 </Accordion>

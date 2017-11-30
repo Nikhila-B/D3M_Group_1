@@ -30,3 +30,5 @@
 .show-pointer:hover {
   cursor: pointer; 
 }
+
+li.link-wrapper{ color:#DAf7a6 ; background-color: white}

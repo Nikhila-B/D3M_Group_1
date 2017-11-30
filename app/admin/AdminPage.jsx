@@ -16,10 +16,10 @@ export default class AdminPage extends React.Component {
     render() {
         return (
             <div>
-                <Panel header="Treatments">
+                <Panel bsStyle="primary" header="Treatments">
                     <Route component={TreatmentPanel} />
                 </Panel>
-                <Panel header="Tasks">
+                <Panel bsStyle="success" header="Tasks">
                     <TasksPanel />
                 </Panel>
             </div>

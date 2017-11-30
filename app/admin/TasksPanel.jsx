@@ -51,7 +51,7 @@ export default class TasksPanel extends React.Component {
                             <tr key={taskId}>
                                 <td>{taskId}</td>
                                 <td>{this.state.tasks[taskId].task}</td>
-                                <td>{this.state.tasks[taskId].minutesPerPatient}</td>
+                                <td>{Math.round(this.state.tasks[taskId].minutesPerPatient)} mins</td>
                             </tr>
                         )}
                     </tbody>

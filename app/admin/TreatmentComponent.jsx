@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Panel, Form, FormGroup, ControlLabel, Button, FormControl, Col, Checkbox, Table } from 'react-bootstrap';
+import { Panel, Form, FormGroup, ControlLabel, Button, FormControl, Col, Checkbox, Table, ButtonToolbar } from 'react-bootstrap';
 import { Link } from 'react-router-dom'
 
 export default class TreatmentComponent extends React.Component {
@@ -36,10 +36,12 @@ export default class TreatmentComponent extends React.Component {
                 <td>{this.props.name}</td>
                 <td className="show-pointer" onClick={() => this.setState({ displayTasks: !this.state.displayTasks })}> {this.renderTasks()}</td>
                 <td>
+                <ButtonToolbar>
                     <Link to={this.props.manageLink}>
-                        <Button onClick={() => this.props.manage()}>Manage Treatment Steps</Button>
+                        <Button bsStyle="info" onClick={() => this.props.manage()}>Manage Treatment Steps</Button>
                     </Link>
-                    <Button onClick={() => this.props.delete()}>Delete</Button>
+                    <Button bsStyle="warning" onClick={() => this.props.delete()}>Delete</Button>
+                </ButtonToolbar>
                 </td>
             </tr>
         );

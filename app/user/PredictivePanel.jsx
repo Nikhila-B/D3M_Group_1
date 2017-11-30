@@ -101,7 +101,7 @@ export default class PredictivePanel extends React.Component {
 
                     {this.state.selectedIndicator &&
                         <div style={{ textAlign: "right" }}>
-                            <Button onClick={() => this.calculate()}>Calculate</Button>
+                            <Button bsStyle="success" bsSize="large" onClick={() => this.calculate()}>Calculate</Button>
                         </div>
                     }
                 </Form>

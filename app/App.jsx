@@ -16,8 +16,9 @@ class App extends React.Component {
             <BrowserRouter>
                 <Grid>
                     <Nav bsStyle="tabs" activeKey="1">
-                        <li><Link to="/user">User</Link></li>
-                        <li><Link to="/admin">Admin</Link></li>
+                        <li className="link-wrapper"><Link to="/user">User</Link></li>
+                        <li> </li>
+                        <li className="link-wrapper"><Link to="/admin">Admin</Link></li>
                     </Nav>
                     <br />
                     <Switch>

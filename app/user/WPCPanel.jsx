@@ -216,7 +216,7 @@ export default class WPCPanel extends React.Component {
                                     value={this.state.treatmentFilter}
                                     onChange={e => this.setState({ treatmentFilter: e.target.value })} />
                                 <div style={{ textAlign: "right", paddingTop: 5 }}>
-                                    <Button onClick={() => this.toggleTreatments()}>
+                                    <Button bsStyle="primary" bsSize="small" onClick={() => this.toggleTreatments()}>
                                         {this.state.treatmentToggle ? "Unselect" : "Select"} All
                                     </Button>
                                 </div>
@@ -252,7 +252,7 @@ export default class WPCPanel extends React.Component {
                 </FormGroup>
                 <hr />
                 <div style={{ textAlign: "right", paddingTop: 10 }}>
-                    <Button onClick={() => this.calculateClicked()}>Calculate</Button>
+                    <Button bsStyle="warning" bsSize="large" onClick={() => this.calculateClicked()}>Calculate</Button>
                 </div>
             </Form >
         );

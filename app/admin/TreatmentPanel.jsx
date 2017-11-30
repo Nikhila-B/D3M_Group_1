@@ -105,7 +105,7 @@ export default class TreatmentPanel extends React.Component {
         return (
             <div>
                 <div style={{ textAlign: "right", paddingBottom: 4 }}>
-                    <Button
+                    <Button bsStyle="success"
                         disabled={this.state.showingNewTreatment}
                         onClick={() => this.setState({ showingNewTreatment: true })}>
                         Add
@@ -160,7 +160,7 @@ export default class TreatmentPanel extends React.Component {
                                         <td>{this.state.tasks[step.taskId].task}</td>
                                         <td> {this.state.cadres[step.cadreId]}</td>
                                         <td>
-                                            <Button
+                                            <Button bsStyle="warning"
                                                 onClick={() => this.deleteStep(route.match.params.id, step.id)}>
                                                 Delete
                                             </Button>
@@ -178,7 +178,7 @@ export default class TreatmentPanel extends React.Component {
                         </Table>
                     </Col>
                     <Col xs={2}>
-                        <Button
+                        <Button bsStyle="success"
                             onClick={() => this.setState({ showingNewStep: true })}
                             disabled={this.state.showingNewStep}>
                             Add Step
