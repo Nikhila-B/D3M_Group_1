@@ -274,6 +274,7 @@ export default class WPCPanel extends React.Component {
                     <thead>
                         <tr>
                             <th>Cadre</th>
+                            <th>Current Workers</th>
                             <th>Workers Needed</th>
                             <th>Workforce Pressure</th>
                         </tr>
@@ -282,10 +283,13 @@ export default class WPCPanel extends React.Component {
                         {Object.keys(this.state.results.workersNeeded).map(cadreId =>
                             <tr>
                                 <td>
-                                    <h4 key={cadreId}>{this.state.cadreDict[cadreId]}</h4>
+                                    <h4 key={cadreId + 'cadre'}>{this.state.cadreDict[cadreId]}</h4>
                                 </td>
                                 <td>
-                                    <h4 key={cadreId}>{Math.round(this.state.results.workersNeeded[cadreId] + .49999)}</h4>
+                                    <h4 key={cadreId + 'current'}>{Math.round(this.state.results.currentWorkers[cadreId] + .49999)}</h4>
+                                </td>
+                                <td>
+                                    <h4 key={cadreId + 'needed'}>{Math.round(this.state.results.workersNeeded[cadreId] + .49999)}</h4>
                                 </td>
                                 <td>
                                     {this.state.results.pressure[cadreId] &&

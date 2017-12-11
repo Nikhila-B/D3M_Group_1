@@ -115,15 +115,18 @@ router.post('/', (req, res) => {
             });
             // step 3: calculate pressure, but only for the selected treatments
             let pressure = {}
+            let currentWorkers = {};
             Object.keys(workersPerTreatment).forEach(cadreId => {
                 let workers = 0;
                 treatmentIds.forEach(treatmentId => {
                     workers += workersPerTreatment[cadreId][treatmentId];
                 });
+                currentWorkers[cadreId] = workers;
                 pressure[cadreId] = workers / workersNeeded[cadreId];
             });
             
             res.json({
+                currentWorkers: currentWorkers,
                 workersNeeded: workersNeeded,
                 pressure: pressure
             });
